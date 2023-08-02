@@ -28,9 +28,9 @@ To go back to Framework official firmware
 
 - Any Module
   - [x] Jump to bootloader: `bootloader_jump.py`
+  - [x] Read sleep pin
 - Any keyboard
   - [ ] Scan keys
-  - [ ] Example
 - White Backlight Keyboard
   - [x] Control Backlight
   - [x] Control Capslock LED
