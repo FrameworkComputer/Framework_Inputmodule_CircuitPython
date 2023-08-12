@@ -42,5 +42,5 @@ To go back to Framework official firmware
   - [ ] Control RGB Backlight
   - [ ] Example
 - LED Matrix
-  - [ ] Control LED Matrix
-  - [ ] Example WIP: `led_matrix.py`
+  - [x] Control LED Matrix
+  - [x] Example WIP: `led_matrix.py`
