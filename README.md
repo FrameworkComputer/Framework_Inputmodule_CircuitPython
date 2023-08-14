@@ -36,7 +36,7 @@ To go back to Framework official firmware
   - [x] Control Capslock LED
   - [x] Example: `white_keyboard_blink.py`
 - RGB Keyboard
-  - [ ] Control RGB Backlight
+  - [x] Control RGB Backlight: `ansi_keyboard_backlight.py`
   - [ ] Example
 - RGB Macropad
   - [x] Control RGB Backlight: `macropad_backlight.py`
