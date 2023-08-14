@@ -29,18 +29,20 @@ To go back to Framework official firmware
 - Any Module
   - [x] Jump to bootloader: `bootloader_jump.py`
   - [x] Read sleep pin
-- Any keyboard
-  - [ ] Scan keys
 - White Backlight Keyboard
   - [x] Control Backlight
   - [x] Control Capslock LED
   - [x] Example: `white_keyboard_blink.py`
 - RGB Keyboard
   - [x] Control RGB Backlight: `ansi_keyboard_backlight.py`
-  - [ ] Example
+  - [ ] Keyscan
 - RGB Macropad
   - [x] Control RGB Backlight: `macropad_backlight.py`
-  - [ ] Scan keys
+  - [x] Scan keys: `macropad_keyscan.py`
+- White Backlight Numpad
+  - [x] Scan keys and backlight
+  - [x] Backlight control
+  - [x] Example: `numpad_keyscan.py`
 - LED Matrix
   - [x] Control LED Matrix
-  - [x] Example WIP: `led_matrix.py`
+  - [x] Example: `led_matrix.py`
