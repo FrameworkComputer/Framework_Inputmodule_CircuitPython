@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Daniel Schaefer for Framework Computer
 # SPDX-License-Identifier: MIT
+#
+# Turn on RGB backlight, cycle through RGB every second
 
 import time
 import board

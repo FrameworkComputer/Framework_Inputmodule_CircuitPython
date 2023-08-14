@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2023 Daniel Schaefer for Framework Computer
+# SPDX-License-Identifier: MIT
+#
+# Show zigzag pattern on LED matrix. Turn off if SLEEP# pin is low.
+#
+# Dependencies:
 # On the CIRCUITPY drive
 # - Save this file as code.py
 # - Make sure there's a lib folder and download:

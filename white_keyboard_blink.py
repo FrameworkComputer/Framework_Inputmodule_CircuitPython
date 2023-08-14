@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: Daniel Schaefer 2023 for Framework Computer
+# SPDX-License-Identifier: MIT
+#
+# Blink keyboard backlight and capslock LED every second
+# Keep lights off if SLEEP# low
+
 import time
 import board
 import digitalio
