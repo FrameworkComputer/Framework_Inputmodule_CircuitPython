@@ -1,6 +1,5 @@
 import time
 import board
-import busio
 import digitalio
 import pwmio
 
@@ -20,9 +19,8 @@ while True:
         # If the host is asleep, stop blinking
         time.sleep(0.1)
         continue
-
     capslock.value = True
-    backlight.duty_cycle = int(65535 / 2) # 50% brightness
+    backlight.duty_cycle = int(65535 / 2)  # 50% brightness
     time.sleep(1)
 
     capslock.value = False
