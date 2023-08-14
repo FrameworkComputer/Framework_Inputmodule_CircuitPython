@@ -15,9 +15,9 @@ Once your environment is set up you can compile with:
 
 ```sh
 cd ports/raspberrypi
-make BOARD=fwk_keyboard
+make BOARD=framework_inputmodule
 
-# Use firmware at build-fwk_keyboard/firmware.uf2
+# Use firmware at build-framework_inputmodule/firmware.uf2
 ```
 
 Flash the firmware once and you're good to go.
