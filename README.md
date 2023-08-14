@@ -39,8 +39,8 @@ To go back to Framework official firmware
   - [ ] Control RGB Backlight
   - [ ] Example
 - RGB Macropad
-  - [ ] Control RGB Backlight
-  - [ ] Example
+  - [x] Control RGB Backlight: `macropad_backlight.py`
+  - [ ] Scan keys
 - LED Matrix
   - [x] Control LED Matrix
   - [x] Example WIP: `led_matrix.py`
