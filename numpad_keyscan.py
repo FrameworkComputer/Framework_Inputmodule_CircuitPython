@@ -43,20 +43,20 @@ NUMPAD_KEYMAP = [
 keyboard = Keyboard(usb_hid.devices)
 
 # Set unused pins to input to avoid interfering. They're hooked up to rows 5 and 6
-gp6 = sleep_pin = digitalio.DigitalInOut(board.GP6)
+gp6 = digitalio.DigitalInOut(board.GP6)
 gp6.direction = digitalio.Direction.INPUT
-gp7 = sleep_pin = digitalio.DigitalInOut(board.GP7)
+gp7 = digitalio.DigitalInOut(board.GP7)
 gp7.direction = digitalio.Direction.INPUT
 
 # Set up analog MUX pins
-mux_enable = sleep_pin = digitalio.DigitalInOut(board.MUX_ENABLE)
+mux_enable = digitalio.DigitalInOut(board.MUX_ENABLE)
 mux_enable.direction = digitalio.Direction.OUTPUT
 mux_enable.value = False  # Low to enable it
-mux_a = sleep_pin = digitalio.DigitalInOut(board.MUX_A)
+mux_a = digitalio.DigitalInOut(board.MUX_A)
 mux_a.direction = digitalio.Direction.OUTPUT
-mux_b = sleep_pin = digitalio.DigitalInOut(board.MUX_B)
+mux_b = digitalio.DigitalInOut(board.MUX_B)
 mux_b.direction = digitalio.Direction.OUTPUT
-mux_c = sleep_pin = digitalio.DigitalInOut(board.MUX_C)
+mux_c = digitalio.DigitalInOut(board.MUX_C)
 mux_c.direction = digitalio.Direction.OUTPUT
 
 # Set up KSO pins
@@ -88,7 +88,7 @@ for kso in kso_pins:
 adc_in = analogio.AnalogIn(board.GP28)
 
 # Signal boot done
-boot_done = sleep_pin = digitalio.DigitalInOut(board.BOOT_DONE)
+boot_done = digitalio.DigitalInOut(board.BOOT_DONE)
 boot_done.direction = digitalio.Direction.OUTPUT
 boot_done.value = False
 
