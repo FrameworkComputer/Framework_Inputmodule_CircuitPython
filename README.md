@@ -22,7 +22,10 @@ make BOARD=framework_inputmodule
 
 Flash the firmware once and you're good to go.
 
-To go back to Framework official firmware
+To go back to Framework official firmware follow the official instructions:
+
+- [LED Matrix Releases](https://github.com/frameworkComputer/inputmodule-rs/releases)
+- [Keyboards](https://github.com/frameworkComputer/qmk_firmware/releases)
 
 ## Support
 
