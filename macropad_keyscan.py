@@ -36,12 +36,6 @@ MACROPAD_KEYMAP = [
 ]
 keyboard = Keyboard(usb_hid.devices)
 
-# Set unused pins to input to avoid interfering. They're hooked up to rows 5 and 6
-gp6 = sleep_pin = digitalio.DigitalInOut(board.GP6)
-gp6.direction = digitalio.Direction.INPUT
-gp7 = sleep_pin = digitalio.DigitalInOut(board.GP7)
-gp7.direction = digitalio.Direction.INPUT
-
 # Set up analog MUX pins
 mux_enable = sleep_pin = digitalio.DigitalInOut(board.MUX_ENABLE)
 mux_enable.direction = digitalio.Direction.OUTPUT
@@ -79,7 +73,7 @@ kso_pins = [
 ]
 for kso in kso_pins:
     kso.direction = digitalio.Direction.OUTPUT
-adc_in = analogio.AnalogIn(board.GP28)
+adc_in = analogio.AnalogIn(board.ANALOG_IN)
 
 # Signal boot done
 boot_done = sleep_pin = digitalio.DigitalInOut(board.BOOT_DONE)
@@ -143,7 +137,7 @@ def matrix_scan():
 
 
 # Enable LED controller via SDB pin
-sdb = digitalio.DigitalInOut(board.GP29)
+sdb = digitalio.DigitalInOut(board.SDB)
 sdb.direction = digitalio.Direction.OUTPUT
 sdb.value = True
 
@@ -160,7 +154,7 @@ is31.global_current = 0xFF  # Set current to max
 is31.enable = True
 
 # SLEEP# pin. Low if the host is sleeping
-sleep_pin = digitalio.DigitalInOut(board.GP0)
+sleep_pin = digitalio.DigitalInOut(board.SLEEP)
 sleep_pin.direction = digitalio.Direction.INPUT
 
 MATRIX_LED_MAP = [

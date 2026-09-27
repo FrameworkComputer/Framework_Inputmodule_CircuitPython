@@ -9,14 +9,14 @@ import board
 import digitalio
 import pwmio
 
-capslock = digitalio.DigitalInOut(board.GP24)
+capslock = digitalio.DigitalInOut(board.CAPS_LED)
 capslock.direction = digitalio.Direction.OUTPUT
 
 # SLEEP# pin. Low if the host is sleeping
-sleep_pin = digitalio.DigitalInOut(board.GP0)
+sleep_pin = digitalio.DigitalInOut(board.SLEEP)
 sleep_pin.direction = digitalio.Direction.INPUT
 
-backlight = pwmio.PWMOut(board.GP25, frequency=5000, duty_cycle=0)
+backlight = pwmio.PWMOut(board.BACKLIGHT, frequency=5000, duty_cycle=0)
 
 # Blink capslock LED and backlight
 while True:

@@ -30,7 +30,7 @@ WIDTH = 9
 HEIGHT = 34
 
 # Enable LED Matrix via SDB pin
-sdb = digitalio.DigitalInOut(board.GP29)
+sdb = digitalio.DigitalInOut(board.SDB)
 sdb.direction = digitalio.Direction.OUTPUT
 sdb.value = True
 

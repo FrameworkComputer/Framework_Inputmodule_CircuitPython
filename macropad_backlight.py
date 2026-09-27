@@ -10,7 +10,7 @@ import digitalio
 from framework_is31fl3743 import IS31FL3743
 
 # Enable LED controller via SDB pin
-sdb = digitalio.DigitalInOut(board.GP29)
+sdb = digitalio.DigitalInOut(board.SDB)
 sdb.direction = digitalio.Direction.OUTPUT
 sdb.value = True
 
@@ -27,7 +27,7 @@ is31.global_current = 0xFF  # set current to max
 is31.enable = True
 
 # SLEEP# pin. Low if the host is sleeping
-sleep_pin = digitalio.DigitalInOut(board.GP0)
+sleep_pin = digitalio.DigitalInOut(board.SLEEP)
 sleep_pin.direction = digitalio.Direction.INPUT
 
 # Keep in the script to keep the LED controller on
