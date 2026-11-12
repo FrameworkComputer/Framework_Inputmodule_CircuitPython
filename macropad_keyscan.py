@@ -17,7 +17,12 @@ from framework_is31fl3743 import IS31FL3743
 MATRIX_COLS = 8
 MATRIX_ROWS = 4
 
-ADC_THRESHOLD = 2.9
+# Pressed keys read ~0.0-0.2V. Idle keys settle at ~2.4-3.3V, but neighbors of a
+# held key can dip to ~1.5V, so keep the threshold well below that.
+ADC_THRESHOLD = 1.0
+# The rows read low right after the pins are configured until they charge up.
+# Ignore scans during this time to avoid phantom key presses.
+STARTUP_SETTLE_S = 1.0
 DEBUG = False
 
 MATRIX = [
@@ -203,9 +208,18 @@ MATRIX_LED_MAP = [
 prev_matrix_pos = None
 debounce = 0
 color = 0  # 0 Blue, 1 Green, 2 Red
+
+# Keep scanning (and discarding results) until the row lines have charged up
+settle_end = time.monotonic() + STARTUP_SETTLE_S
+while time.monotonic() < settle_end:
+    matrix_scan()
+
 while True:
     is31.enable = sleep_pin.value
     matrix_pos = matrix_scan()
+    # Ignore positions in the matrix that have no key
+    if matrix_pos and MATRIX[matrix_pos[1]][matrix_pos[0]] is None:
+        matrix_pos = None
 
     if not matrix_pos:
         debounce = 0
