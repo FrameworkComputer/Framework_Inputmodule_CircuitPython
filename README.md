@@ -29,6 +29,9 @@ To go back to Framework official firmware follow the official instructions:
 
 ## Support
 
+The keyscan scripts need `framework_keyscan.py` copied to the CIRCUITPY drive
+next to `code.py`.
+
 - Any Module
   - [x] Jump to bootloader: `bootloader_jump.py`
   - [x] Read sleep pin
@@ -38,7 +41,7 @@ To go back to Framework official firmware follow the official instructions:
   - [x] Example: `white_keyboard_blink.py`
 - RGB Keyboard
   - [x] Control RGB Backlight: `ansi_keyboard_backlight.py`
-  - [ ] Keyscan
+  - [x] Keyscan (ANSI): `ansi_keyboard_keyscan.py`
 - RGB Macropad
   - [x] Control RGB Backlight: `macropad_backlight.py`
   - [x] Scan keys: `macropad_keyscan.py`

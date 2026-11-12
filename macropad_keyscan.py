@@ -4,27 +4,24 @@
 # Handle button pressed on the macropad
 # Send A-X key pressed
 # The pressed button will light up, cycling through RGB colors
+#
+# Requires framework_keyscan.py on the CIRCUITPY drive.
 import time
 import board
 import busio
 import digitalio
-import analogio
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from framework_is31fl3743 import IS31FL3743
+from framework_keyscan import KeyScanner
 
-MATRIX_COLS = 8
-MATRIX_ROWS = 4
-
-# Pressed keys read ~0.0-0.2V. Idle keys settle at ~2.4-3.3V, but neighbors of a
-# held key can dip to ~1.5V, so keep the threshold well below that.
-ADC_THRESHOLD = 1.0
-# The rows read low right after the pins are configured until they charge up.
-# Ignore scans during this time to avoid phantom key presses.
-STARTUP_SETTLE_S = 1.0
 DEBUG = False
+# Print every key reading below this voltage whenever those readings change.
+# Useful for tuning the thresholds in framework_keyscan.py. None to disable.
+DEBUG_LOW_V = None
 
+# Matrix position (row KSI, column KSO) -> (x, y) position in MACROPAD_KEYMAP
 MATRIX = [
     [(0, 1), (0, 2), (0, 3), (0, 4), (1, 1), (1, 2), (1, 3), (1, 4)],
     [(0, 5), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (3, 1), (3, 3)],
@@ -40,106 +37,6 @@ MACROPAD_KEYMAP = [
     [Keycode.U, Keycode.V, Keycode.W, Keycode.X],
 ]
 keyboard = Keyboard(usb_hid.devices)
-
-# Set up analog MUX pins
-mux_enable = sleep_pin = digitalio.DigitalInOut(board.MUX_ENABLE)
-mux_enable.direction = digitalio.Direction.OUTPUT
-mux_enable.value = False  # Low to enable it
-mux_a = sleep_pin = digitalio.DigitalInOut(board.MUX_A)
-mux_a.direction = digitalio.Direction.OUTPUT
-mux_b = sleep_pin = digitalio.DigitalInOut(board.MUX_B)
-mux_b.direction = digitalio.Direction.OUTPUT
-mux_c = sleep_pin = digitalio.DigitalInOut(board.MUX_C)
-mux_c.direction = digitalio.Direction.OUTPUT
-
-# Set up KSO pins
-kso_pins = [
-    digitalio.DigitalInOut(x)
-    for x in [
-        # KSO0 - KSO7 for Keyboards and Numpad
-        board.KSO0,
-        board.KSO1,
-        board.KSO2,
-        board.KSO3,
-        board.KSO4,
-        board.KSO5,
-        board.KSO6,
-        board.KSO7,
-        # KSO8 - KSO15 for Keyboards only
-        board.KSO8,
-        board.KSO9,
-        board.KSO10,
-        board.KSO11,
-        board.KSO12,
-        board.KSO13,
-        board.KSO14,
-        board.KSO15,
-    ]
-]
-for kso in kso_pins:
-    kso.direction = digitalio.Direction.OUTPUT
-adc_in = analogio.AnalogIn(board.ANALOG_IN)
-
-# Signal boot done
-boot_done = sleep_pin = digitalio.DigitalInOut(board.BOOT_DONE)
-boot_done.direction = digitalio.Direction.OUTPUT
-boot_done.value = False
-
-
-def mux_select_row(row):
-    index = 0
-    if row == 0:
-        index = 2
-    elif row == 1:
-        index = 0
-    elif row == 2:
-        index = 1
-    else:
-        index = row
-
-    mux_a.value = index & 0x01
-    mux_b.value = index & 0x02
-    mux_c.value = index & 0x04
-
-
-def drive_col(col, value):
-    kso_pins[col].value = value
-
-
-def to_voltage(adc_sample):
-    return (adc_sample * 3.3) / 65536
-
-
-def matrix_scan():
-    matrix_pos = None
-    for col in range(MATRIX_COLS):
-        drive_col(col, True)
-
-    for col in range(MATRIX_COLS):
-        drive_col(col, False)
-
-        for row in range(MATRIX_ROWS):
-            mux_select_row(row)
-
-            voltage = to_voltage(adc_in.value)
-            if DEBUG:
-                print(f"{col}:{row}: {voltage}V")
-
-            if voltage < ADC_THRESHOLD:
-                if DEBUG:
-                    print(f"Pressed {col}:{row}")
-                matrix_pos = (col, row)
-
-                # TODO: Handle debounce in a different way
-                # If we break here we can only ever handle a single keypress at once
-                if matrix_pos:
-                    break
-
-        drive_col(col, True)
-    if DEBUG:
-        print()
-    return matrix_pos
-
 
 # Enable LED controller via SDB pin
 sdb = digitalio.DigitalInOut(board.SDB)
@@ -205,43 +102,45 @@ MATRIX_LED_MAP = [
     ],
 ]
 
-prev_matrix_pos = None
-debounce = 0
 color = 0  # 0 Blue, 1 Green, 2 Red
+lit_led = None
+held = set()
 
-# Keep scanning (and discarding results) until the row lines have charged up
-settle_end = time.monotonic() + STARTUP_SETTLE_S
-while time.monotonic() < settle_end:
-    matrix_scan()
+for i in range(18 * 11):
+    is31[i] = 0x00
+
+scanner = KeyScanner(MATRIX, debug_low_v=DEBUG_LOW_V, debug=DEBUG)
 
 while True:
-    is31.enable = sleep_pin.value
-    matrix_pos = matrix_scan()
-    # Ignore positions in the matrix that have no key
-    if matrix_pos and MATRIX[matrix_pos[1]][matrix_pos[0]] is None:
-        matrix_pos = None
+    awake = sleep_pin.value
+    is31.enable = awake
 
-    if not matrix_pos:
-        debounce = 0
-    if matrix_pos and matrix_pos == prev_matrix_pos:
-        debounce += 1
-        # print(f"Debounce {debounce}")
+    # Ignore keys while the host is asleep
+    if not awake:
+        if held:
+            keyboard.release_all()
+            held.clear()
+        scanner.reset()
+        time.sleep(0.1)
+        continue
 
-    if matrix_pos and (matrix_pos != prev_matrix_pos or debounce > 10 or debounce == 0):
-        debounce = 0
-        (col, row) = matrix_pos
+    for (row, col), pressed in scanner.scan():
         (x, y) = MATRIX[row][col]
         code = MACROPAD_KEYMAP[y][x]
-        if code:
-            print(f"Pressed {code} ({col}, {row})")
-
-            for i in range(18 * 11):
-                is31[i] = 0x00
-            if MATRIX_LED_MAP[row][col]:
-                is31[MATRIX_LED_MAP[row][col] + color] = 0xFF
+        if pressed:
+            print(f"Pressed {code} (KSO{col}, KSI{row})")
+            # Only one key is lit at a time
+            if lit_led is not None:
+                is31[lit_led] = 0x00
+                lit_led = None
+            if MATRIX_LED_MAP[row][col] is not None:
+                lit_led = MATRIX_LED_MAP[row][col] + color
+                is31[lit_led] = 0xFF
                 color = (color + 1) % 3
             keyboard.press(code)
-            keyboard.release_all()
-    prev_matrix_pos = matrix_pos
+            held.add(code)
+        else:
+            keyboard.release(code)
+            held.discard(code)
 
-    time.sleep(0.01)
+    time.sleep(0.001)
