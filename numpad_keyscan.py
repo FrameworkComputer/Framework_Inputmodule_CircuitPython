@@ -17,7 +17,13 @@ from adafruit_hid.keycode import Keycode
 MATRIX_COLS = 8
 MATRIX_ROWS = 4
 
-ADC_THRESHOLD = 2.9
+# Pressed keys read ~0.0-0.2V. Idle keys settle at ~2.4-3.3V, but neighbors of a
+# held key can dip to ~1.5V, so keep the threshold well below that.
+# (Values measured on the macropad, which uses the same matrix circuit.)
+ADC_THRESHOLD = 1.0
+# The rows read low right after the pins are configured until they charge up.
+# Ignore scans during this time to avoid phantom key presses.
+STARTUP_SETTLE_S = 1.0
 DEBUG = False
 
 MATRIX = [
@@ -26,19 +32,20 @@ MATRIX = [
     [(3, 5), (0, 0), (1, 0), None, (3, 0), (3, 2), (3, 4), (1, 5)],
     [None, None, None, None, (2, 0), None, None, None],
 ]
+# Physical layout. Tall keys (+, Enter) and the wide 0 occupy two cells.
 NUMPAD_KEYMAP = [
     # circuitpython doesn't have calculator keycode
     [Keycode.ESCAPE, None, Keycode.EQUALS, Keycode.BACKSPACE],
     [
         Keycode.KEYPAD_NUMLOCK,
-        Keycode.FORWARD_SLASH,
+        Keycode.KEYPAD_FORWARD_SLASH,
         Keycode.KEYPAD_ASTERISK,
         Keycode.KEYPAD_MINUS,
     ],
-    [Keycode.KEYPAD_SEVEN, Keycode.EIGHT, Keycode.NINE, Keycode.MINUS],
-    [Keycode.KEYPAD_FOUR, Keycode.FIVE, Keycode.SIX, Keycode.KEYPAD_PLUS],
-    [Keycode.KEYPAD_ONE, Keycode.KEYPAD_TWO, Keycode.KEYPAD_THREE, Keycode.KEYPAD_PLUS],
-    [Keycode.KEYPAD_ZERO, Keycode.KEYPAD_ZERO, Keycode.KEYPAD_ENTER, Keycode.ENTER],
+    [Keycode.KEYPAD_SEVEN, Keycode.KEYPAD_EIGHT, Keycode.KEYPAD_NINE, Keycode.KEYPAD_PLUS],
+    [Keycode.KEYPAD_FOUR, Keycode.KEYPAD_FIVE, Keycode.KEYPAD_SIX, Keycode.KEYPAD_PLUS],
+    [Keycode.KEYPAD_ONE, Keycode.KEYPAD_TWO, Keycode.KEYPAD_THREE, Keycode.KEYPAD_ENTER],
+    [Keycode.KEYPAD_ZERO, Keycode.KEYPAD_ZERO, Keycode.KEYPAD_PERIOD, Keycode.KEYPAD_ENTER],
 ]
 keyboard = Keyboard(usb_hid.devices)
 
@@ -150,9 +157,18 @@ backlight = pwmio.PWMOut(board.BACKLIGHT, frequency=5000, duty_cycle=0)
 prev_matrix_pos = None
 debounce = 0
 color = 0  # 0 Blue, 1 Green, 2 Red
+
+# Keep scanning (and discarding results) until the row lines have charged up
+settle_end = time.monotonic() + STARTUP_SETTLE_S
+while time.monotonic() < settle_end:
+    matrix_scan()
+
 while True:
     backlight.duty_cycle = int(65535 / 2) if sleep_pin.value else 0
     matrix_pos = matrix_scan()
+    # Ignore positions in the matrix that have no key
+    if matrix_pos and MATRIX[matrix_pos[1]][matrix_pos[0]] is None:
+        matrix_pos = None
 
     if not matrix_pos:
         debounce = 0
