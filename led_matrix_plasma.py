@@ -27,6 +27,16 @@ LED_SCALING = 63  # 0..255; same quarter-brightness limit as led_matrix.py.
 
 def led_index(x, y):
     """Map a matrix coordinate to the LED driver's linear channel index."""
+    if x == WIDTH - 1:
+        # Production (DVT2 onward) boards reroute this edge column to CS35..39.
+        # The original led_matrix.py table describes the earlier EVT wiring.
+        if y < 10:
+            sw = y // 5
+            cs = (36, 37, 38, 39, 35)[y % 5]
+        else:
+            sw = 2 + (y - 10) // 4
+            cs = (36, 37, 38, 35)[(y - 10) % 4]
+        return 180 + 90 + sw * 9 + (cs - 31)
     if y < 30:
         if x < 6:
             return x * 30 + y
