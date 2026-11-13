@@ -52,3 +52,4 @@ next to `code.py`.
 - LED Matrix
   - [x] Control LED Matrix
   - [x] Example: `led_matrix.py`
+  - [x] Animated plasma: `led_matrix_plasma.py`
